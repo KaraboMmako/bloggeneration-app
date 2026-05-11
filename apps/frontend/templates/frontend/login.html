@@ -1,0 +1,54 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="login-split-page">
+    <div class="login-split-left">
+        <div class="brand-box">
+            <img src="{% static 'frontend/image/bloggen-icon.png' %}" alt="BlogGen Logo">
+            <h1>Welcome to BlogGen</h1>
+            <p>Create AI-powered blogs, outlines, sections, and images from one simple dashboard.</p>
+        </div>
+    </div>
+
+    <div class="login-split-right">
+        <div class="login-card">
+            <h2>Sign in</h2>
+            <p class="muted">Access your blog generator workspace</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" action="">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Email address</label>
+                    <input type="email" name="email" class="form-control" placeholder="karabo@example.com" required>
+                </div>
+
+                <div class="mb-2">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                </div>
+
+                <div class="forgot-row">
+                    <a href="{% url 'frontend:forgot_password' %}" class="forgot-link">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+            </form>
+
+            <p class="register-text">
+                Don’t have a profile yet?
+                <a href="{% url 'frontend:register' %}">Register</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

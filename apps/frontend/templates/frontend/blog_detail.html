@@ -1,0 +1,222 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% load frontend_extras %}
+
+{% block title %}{{ project.name }} | BlogGen{% endblock %}
+
+{% block content %}
+<div class="detail-shell{% if review %} review-mode{% endif %}">
+
+    <div class="detail-header">
+        <div>
+            <span class="dashboard-pill">Blog Detail</span>
+            <h1>{{ project.name }}</h1>
+            <p class="detail-dates">
+                Created {{ project.created_at|date:"M d, Y" }}
+                {% if project.updated_at|date:"Y-m-d" != project.created_at|date:"Y-m-d" %}
+                    <span class="detail-date-sep">·</span>
+                    <span class="detail-date-regen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        Regenerated {{ project.updated_at|date:"M d, Y" }}
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="detail-actions">
+            <a href="{% url 'frontend:dashboard' %}" class="back-btn">← Dashboard</a>
+
+            {% if project.user == request.user %}
+                <form method="POST" action="{% url 'frontend:publish_blog' project.id %}" style="margin:0;display:contents;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="detail">
+                    {% if project.status == "published" %}
+                        <button type="submit" class="detail-unpublish-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            Unpublish
+                        </button>
+                    {% else %}
+                        <button type="submit" class="detail-publish-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Publish
+                        </button>
+                    {% endif %}
+                </form>
+            {% endif %}
+
+            <button type="button" id="copy-blog-btn" class="copy-blog-btn" data-blog-title="{{ project.name }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy Blog
+            </button>
+            <a href="{% url 'frontend:generate_blog' %}" class="detail-regen-btn">+ New Blog</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if hero_image and hero_image.image_url %}
+        <div class="hero-image-card">
+            <img src="{{ hero_image.image_url }}" alt="{{ hero_image.alt_text }}">
+        </div>
+    {% endif %}
+
+    <div class="sections-list" id="blog-sections">
+        {% for section in sections %}
+            <div class="section-card" data-section-heading="{{ section.heading }}" data-section-type="{{ section.section_type }}">
+
+                <div class="section-card-header">
+                    <div>
+                        <span class="section-type">{{ section.section_type }}</span>
+                        <h2>{{ section.heading }}</h2>
+                    </div>
+
+                    <div class="section-buttons">
+                        {% if project.user == request.user %}
+                        <button
+                            type="button"
+                            class="section-edit-btn"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#edit-{{ section.id }}"
+                            aria-expanded="false"
+                            aria-controls="edit-{{ section.id }}"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Edit
+                        </button>
+
+                        <button
+                            type="button"
+                            class="section-action-btn"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#regen-{{ section.id }}"
+                            aria-expanded="false"
+                            aria-controls="regen-{{ section.id }}"
+                        >
+                            Regenerate
+                        </button>
+
+                        <form method="POST" action="{% url 'frontend:generate_section_image' section.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="section-image-btn">
+                                Generate Image
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="collapse edit-box" id="edit-{{ section.id }}">
+                    <form method="POST" action="{% url 'frontend:update_section' section.id %}">
+                        {% csrf_token %}
+                        <label for="edit-content-{{ section.id }}">Edit section content</label>
+                        <textarea
+                            id="edit-content-{{ section.id }}"
+                            name="content"
+                            class="form-control edit-box-textarea"
+                        >{{ section.content }}</textarea>
+                        <div class="edit-box-actions">
+                            <button type="submit" class="edit-save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Save Changes
+                            </button>
+                            <button
+                                type="button"
+                                class="edit-cancel-btn"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#edit-{{ section.id }}"
+                            >Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="collapse regen-box" id="regen-{{ section.id }}">
+                    <form method="POST" action="{% url 'frontend:regenerate_section' section.id %}">
+                        {% csrf_token %}
+
+                        <label for="extra-instruction-{{ section.id }}">
+                            Extra instruction for regeneration
+                        </label>
+
+                        <textarea
+                            id="extra-instruction-{{ section.id }}"
+                            name="extra_instruction"
+                            class="form-control"
+                            placeholder="Example: Make this section more conversational and beginner-friendly."
+                        ></textarea>
+
+                        <button type="submit" class="regen-submit-btn">
+                            Regenerate This Section
+                        </button>
+                    </form>
+                </div>
+
+                {% with section_image=image_map|get_item:section.id %}
+                    {% if section_image and section_image.image_url %}
+                        <div class="section-image">
+                            <img src="{{ section_image.image_url }}" alt="{{ section_image.alt_text }}">
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div class="section-content">
+                    {{ section.content|strip_heading:section.heading|linebreaks }}
+                </div>
+
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>No sections found</h3>
+                <p>This blog does not have generated sections yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% if review %}
+<div class="review-bar" id="review-bar">
+    <div class="review-bar-inner">
+        <div class="review-bar-text">
+            <span class="review-bar-emoji">🎉</span>
+            <div>
+                <strong>Your blog is ready!</strong>
+                <span>Choose what to do with it</span>
+            </div>
+        </div>
+
+        <div class="review-bar-actions">
+            <form method="POST" action="{% url 'frontend:set_blog_status' project.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="draft">
+                <button type="submit" class="review-btn review-btn--draft">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Save as Draft
+                </button>
+            </form>
+
+            <form method="POST" action="{% url 'frontend:set_blog_status' project.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="completed">
+                <button type="submit" class="review-btn review-btn--complete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Mark as Completed
+                </button>
+            </form>
+
+            <form method="POST" action="{% url 'frontend:regenerate_blog' project.id %}" class="regen-blog-form">
+                {% csrf_token %}
+                <button type="submit" class="review-btn review-btn--regen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Regenerate
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

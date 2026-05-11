@@ -1,0 +1,60 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Register | BlogGen{% endblock %}
+
+{% block content %}
+<div class="login-split-page">
+    <div class="login-split-left">
+        <div class="brand-box">
+            <img src="{% static 'frontend/image/bloggen-icon.png' %}" alt="BlogGen Logo">
+            <h1>Create your account</h1>
+            <p>Start generating AI-powered blogs, outlines, sections, and images from one simple workspace.</p>
+        </div>
+    </div>
+
+    <div class="login-split-right">
+        <div class="login-card">
+            <h2>Register</h2>
+            <p class="muted">Create your BlogGen profile</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Karabo" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email address</label>
+                    <input type="email" name="email" class="form-control" placeholder="karabo@gmail.com" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Confirm password</label>
+                    <input type="password" name="confirm_password" class="form-control" placeholder="Confirm password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Create account</button>
+            </form>
+
+            <p class="register-text">
+                Already have a profile?
+                <a href="{% url 'frontend:login' %}">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Generate Blog | BlogGen{% endblock %}
+
+{% block content %}
+<div class="generate-shell">
+
+    <div class="generate-header">
+        <div>
+            <span class="dashboard-pill">Create Blog</span>
+            <h1>Generate a New Blog</h1>
+            <p>Describe the blog you want, choose the style, and let BlogGen build it for you.</p>
+        </div>
+
+        <a href="{% url 'frontend:dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <div class="generate-card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label>Blog topic / prompt</label>
+                <textarea name="prompt" class="form-control large-textarea" placeholder="Example: Write a blog about how AI is changing healthcare..." required></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div>
+                    <label>Project name</label>
+                    <input type="text" name="name" class="form-control" placeholder="AI in Healthcare Blog" required>
+                </div>
+
+                <div>
+                    <label>Tone</label>
+                    <select name="tone" class="form-control">
+                        <option>Professional</option>
+                        <option>Friendly</option>
+                        <option>Conversational</option>
+                        <option>Technical</option>
+                        <option>Beginner-friendly</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Audience</label>
+                    <input type="text" name="audience" class="form-control" placeholder="Developers, business owners, students...">
+                </div>
+
+                <div>
+                    <label>Writing style</label>
+                    <select name="writing_style" class="form-control">
+                        <option>Blog-style</option>
+                        <option>SEO-focused</option>
+                        <option>Storytelling</option>
+                        <option>Educational</option>
+                        <option>Technical guide</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Objective</label>
+                    <input type="text" name="objective" class="form-control" placeholder="Teach, explain, persuade, compare...">
+                </div>
+
+                <div>
+                    <label>Desired length</label>
+                    <input type="number" name="desired_length" class="form-control" value="1800">
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label>Keywords</label>
+                <input type="text" name="keywords" class="form-control" placeholder="django, ai, healthcare, automation">
+                <small class="form-hint">Separate keywords with commas.</small>
+            </div>
+
+            <div class="mt-4">
+                <label>Extra instructions</label>
+                <textarea name="instructions" class="form-control" placeholder="Use clear sections, include examples, make it easy to understand..."></textarea>
+            </div>
+
+            <div class="generate-actions">
+                <button type="submit" class="generate-submit-btn">
+                    Generate Blog
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "apps.frontend",
-    "apps.accounts",
+   "apps.accounts.apps.AccountsConfig",
     "apps.blogs",
     "apps.core",
     "apps.generation",

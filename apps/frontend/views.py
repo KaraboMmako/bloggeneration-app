@@ -141,11 +141,6 @@ def dashboard_page(request):
 
 
 @login_required(login_url="frontend:login")
-def generate_blog_page(request):
-    return render(request, "frontend/generate_blog.html")
-
-
-@login_required(login_url="frontend:login")
 def blog_detail_page(request, pk):
     try:
         project = BlogProject.objects.get(pk=pk)

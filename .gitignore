@@ -5,6 +5,11 @@ __pycache__/
 # Django
 db.sqlite3
 
+# Database dumps
+db_dump.sql
+*.dump
+*.pgdump
+
 # Env files
 .env
 
